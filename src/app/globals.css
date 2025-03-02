@@ -36,4 +36,44 @@
   .lottery-number.match {
     @apply bg-success;
   }
+  
+  .lottery-number.placeholder {
+    @apply bg-primary text-2xl;
+  }
+  
+  .lottery-container {
+    @apply flex flex-col gap-4 p-6 bg-white rounded-lg shadow-md;
+  }
+  
+  .lottery-numbers-grid {
+    @apply flex gap-2 justify-center mb-4;
+  }
+  
+  .lottery-buttons {
+    @apply flex gap-4 justify-center mt-4;
+  }
+  
+  .filters-container {
+    @apply flex flex-col gap-3 p-4;
+  }
+  
+  .checkbox-group {
+    @apply flex items-center gap-2;
+  }
+  
+  .contest-info {
+    @apply flex flex-col gap-2;
+  }
+  
+  .contest-label {
+    @apply font-semibold;
+  }
+  
+  .contest-value {
+    @apply bg-primary text-white px-4 py-1 rounded-md;
+  }
+  
+  .saved-numbers {
+    @apply flex flex-wrap gap-2 mt-4;
+  }
 }
