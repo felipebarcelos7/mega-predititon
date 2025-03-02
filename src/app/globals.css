@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 min-h-screen;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
+  }
+  
+  .input-field {
+    @apply border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+  
+  .matrix-cell {
+    @apply w-12 h-12 border text-center text-lg rounded-md;
+  }
+  
+  .matrix-cell.empty {
+    @apply invisible;
+  }
+  
+  .lottery-number {
+    @apply w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold;
+  }
+  
+  .lottery-number.match {
+    @apply bg-success;
+  }
+}

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Palpites - Sistema de Matriz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .matrix-input {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .matrix-cell.empty {
+            visibility: hidden;
+        }
+        .matrix-cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #999;
+            text-align: center;
+            font-size: 20px;
+        }
+        .result {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .numbers {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .number.match {
+            background-color: #28a745;
+        }
+        .official-result {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .official-result input {
+            width: 50px;
+            height: 30px;
+            margin: 5px;
+            text-align: center;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .lottery-type {
+            margin-bottom: 20px;
+        }
+        #patternReport {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Palpites - Sistema de Matriz</h1>
+    
+    <div class="lottery-type">
+        <label for="gameType">Tipo de Jogo:</label>
+        <select id="gameType">
+            <option value="mega">Mega-Sena</option>
+            <option value="milionaria">Milionária</option>
+            <option value="trevo">Trevo</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <div class="matrix-input">
+            <h2>Entrada da Matriz</h2>
+            <div class="matrix-grid" id="matrixGrid">
+                <!-- Células da matriz serão geradas via JavaScript -->
+            </div>
+            <div class="controls">
+                <button onclick="limparMatriz()">Limpar Matriz</button>
+                <button onclick="processarMatriz()">Processar Matriz</button>
+            </div>
+        </div>
+
+        <div class="result">
+            <h2>Palpites Gerados</h2>
+            <div id="palpites1" class="numbers"></div>
+            <div id="palpites2" class="numbers"></div>
+            <div id="palpites3" class="numbers"></div>
+            <div id="palpites4" class="numbers"></div>
+            <div class="official-result">
+                <h3>Resultado Oficial</h3>
+                <div class="numbers">
+                    <input type="number" min="1" max="60" class="official-number">
+                    <input type="number" min="1" max="60" class="official-number">
+                    <input type="number" min="1" max="60" class="official-number">
+                    <input type="number" min="1" max="60" class="official-number">
+                    <input type="number" min="1" max="60" class="official-number">
+                    <input type="number" min="1" max="60" class="official-number">
+                </div>
+                <button onclick="verificarAcertos()">Verificar Acertos</button>
+            </div>
+            <h3>Relatório de Padrões</h3>
+            <div id="patternReport"></div>
+        </div>
+    </div>
+
+    <script>
+        // Inicialização da matriz
+        function inicializarMatriz() {
+            const grid = document.getElementById('matrixGrid');
+            grid.innerHTML = '';
+            const layout = [
+                [true, false, false, true],  // x _ _ y
+                [false, true, true, false],   // _ a b _
+                [false, true, true, false],   // _ c d _
+                [true, false, false, true]    // z _ _ w
+            ];
+
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.className = layout[i][j] ? 'matrix-cell' : 'matrix-cell empty';
+                    input.min = 0;
+                    input.max = 9;
+                    grid.appendChild(input);
+                }
+            }
+        }
+
+        // Limpar matriz
+        function limparMatriz() {
+            const cells = document.getElementsByClassName('matrix-cell');
+            for (let cell of cells) {
+                cell.value = '';
+            }
+        }
+
+        // Extrair movimentos da matriz
+        function extrairMovimentos() {
+            const cells = document.getElementsByClassName('matrix-cell');
+            const matriz = [];
+            for (let i = 0; i < 12; i++) {
+                matriz.push(cells[i].value || '');
+            }
+
+            const movimentos = [];
+            const frequencia = new Map();
+            const combinacoes = new Map();
+
+            // Registrar frequência e combinações
+            matriz.forEach((num, idx) => {
+                if (num) {
+                    frequencia.set(num, (frequencia.get(num) || 0) + 1);
+                    // Registrar combinações com números subsequentes
+                    for (let j = idx + 1; j < matriz.length; j++) {
+                        if (matriz[j]) {
+                            const combo = `${num}${matriz[j]}`;
+                            combinacoes.set(combo, (combinacoes.get(combo) || 0) + 1);
+                        }
+                    }
+                }
+            });
+
+            // Gerar movimentos baseados em frequência
+            frequencia.forEach((freq, num) => {
+                if (freq > 1) {
+                    // Adicionar movimentos baseados em repetições
+                    for (let i = 1; i <= 6; i++) {
+                        const novoNum = (parseInt(num) + i) % 60 || 60;
+                        movimentos.push({
+                            tipo: 'frequencia',
+                            par: `${freq}x${num}`,
+                            parReverso: `${num}->${novoNum}`,
+                            peso: freq * 2,
+                            posicao: `freq${i}`
+                        });
+                    }
+                }
+            });
+
+            // Adicionar movimentos baseados em combinações
+            combinacoes.forEach((freq, combo) => {
+                const [num1, num2] = combo.split('');
+                movimentos.push({
+                    tipo: 'combinacao',
+                    par: combo,
+                    parReverso: `${num2}${num1}`,
+                    peso: freq * (frequencia.get(num1) || 0) + (frequencia.get(num2) || 0),
+                    posicao: 'combo'
+                });
+            });
+
+            // Movimentos originais mantidos
+            // Horizontais
+            for (let i = 0; i < 12; i += 4) {
+                for (let j = i; j < i + 3; j++) {
+                    if (matriz[j] && matriz[j+1]) {
+                        const par = matriz[j] + matriz[j+1];
+                        const parReverso = matriz[j+1] + matriz[j];
+                        movimentos.push({
+                            tipo: 'horizontal',
+                            par,
+                            parReverso,
+                            peso: (frequencia.get(matriz[j]) || 0) + (frequencia.get(matriz[j+1]) || 0),
+                            posicao: `${Math.floor(i/4)}`
+                        });
+                    }
+                }
+            }
+
+            // Verticais e diagonais mantidos como estavam
+            for (let i = 0; i < 4; i++) {
+                for (let j = i; j < 8; j += 4) {
+                    if (matriz[j] && matriz[j+4]) {
+                        const par = matriz[j] + matriz[j+4];
+                        const parReverso = matriz[j+4] + matriz[j];
+                        movimentos.push({
+                            tipo: 'vertical',
+                            par,
+                            parReverso,
+                            peso: (frequencia.get(matriz[j]) || 0) + (frequencia.get(matriz[j+4]) || 0),
+                            posicao: `${i}`
+                        });
+                    }
+                }
+            }
+
+            // Movimentos diagonais (incluindo reverso)
+            const diagonais = [
+                [0,5], [1,6], [2,7],
+                [4,1], [5,2], [6,3],
+                [8,5], [9,6], [10,7],
+                [0,6], [1,7],
+                [4,2], [5,3],
+                [8,6], [9,7]
+            ];
+
+            for (let [i, j] of diagonais) {
+                if (matriz[i] && matriz[j]) {
+                    const par = matriz[i] + matriz[j];
+                    const parReverso = matriz[j] + matriz[i];
+                    movimentos.push({
+                        tipo: 'diagonal',
+                        par,
+                        parReverso,
+                        peso: (frequencia.get(matriz[i]) || 0) + (frequencia.get(matriz[j]) || 0),
+                        posicao: `${i}-${j}`
+                    });
+                }
+            }
+
+            return { movimentos, frequencia, combinacoes };
+        }
+
+        function processarMatriz() {
+            const cells = Array.from(document.getElementsByClassName('matrix-cell'))
+                .map(cell => cell.value || '0');
+
+            const { movimentos, frequencia } = extrairMovimentos();
+            const paresComPeso = new Map();
+
+            // Processar movimentos e seus pesos
+            movimentos.forEach(mov => {
+                const pesoBase = mov.peso;
+                const pesoPar = paresComPeso.get(mov.par) || { count: 0, peso: 0 };
+                const pesoPadrao = pesoPar.peso + pesoBase;
+                paresComPeso.set(mov.par, { count: pesoPar.count + 1, peso: pesoPadrao });
+
+                // Processar também o reverso
+                const pesoParReverso = paresComPeso.get(mov.parReverso) || { count: 0, peso: 0 };
+                paresComPeso.set(mov.parReverso, { count: pesoParReverso.count + 1, peso: pesoParReverso.peso + pesoBase });
+            });
+
+            // Gerar conjuntos de números com base nos pesos
+            for (let i = 1; i <= 2; i++) {
+                const numeros = Array.from(paresComPeso.entries())
+                    .sort((a, b) => b[1].peso - a[1].peso)
+                    .map(([par, { peso }]) => {
+                        const base = parseInt(par);
+                        const offset = aplicarOffsets(base, peso + i);
+                        return offset;
+                    });
+
+                const numerosUnicos = [...new Set(numeros)]
+                    .filter(n => n >= 1 && n <= 60)
+                    .slice(0, 6)
+                    .sort((a, b) => a - b);
+
+                exibirPalpites(numerosUnicos, i);
+            }
+
+            // Gerar conjuntos matemáticos aprimorados
+            for (let i = 3; i <= 4; i++) {
+                const numerosMatematicos = gerarNumerosMatematicos(cells);
+                const numerosModificados = numerosMatematicos.map(n => {
+                    const pesoFreq = Array.from(frequencia.values()).reduce((a, b) => a + b, 0);
+                    return Math.floor(Math.abs((n * (i === 3 ? pesoFreq : pesoFreq * 2) + i * 7)) % 60) + 1;
+                });
+                exibirPalpites(numerosModificados.slice(0, 6), i);
+            }
+
+            exibirRelatorioDetalhado(movimentos, paresComPeso, frequencia);
+        }
+
+        function exibirRelatorioDetalhado(movimentos, pares, frequencia) {
+            const report = document.getElementById('patternReport');
+            let html = '<h4>Frequência Individual dos Números:</h4>';
+            
+            frequencia.forEach((freq, num) => {
+                html += `<p>Número ${num}: ${freq}x</p>`;
+            });
+
+            html += '<h4>Análise de Pares:</h4>';
+            pares.forEach(({ count, peso }, par) => {
+                html += `<p>Par ${par}: ${count} ocorrências (Peso: ${peso})</p>`;
+            });
+
+            html += '<h4>Movimentos Detectados:</h4>';
+            const tiposMovimento = new Map();
+            movimentos.forEach(mov => {
+                const key = `${mov.tipo}-${mov.par}`;
+                if (!tiposMovimento.has(key)) {
+                    html += `<p>${mov.tipo.toUpperCase()}: ${mov.par} -> ${mov.parReverso} (Posição: ${mov.posicao}, Peso: ${mov.peso})</p>`;
+                    tiposMovimento.set(key, true);
+                }
+            });
+
+            report.innerHTML = html;
+        }
+
+        // Aplicar offsets dinâmicos com variação
+        function aplicarOffsets(numero, variacao = 0) {
+            const base = parseInt(numero);
+            const primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59];
+            const primoIndex = base % primos.length;
+            const offset = Math.floor((base * primos[primoIndex] + (13 + variacao)) % 60) + 1;
+            return offset;
+        }
+
+        function gerarNumerosMatematicos(matriz) {
+            const numeros = [];
+            const cells = matriz.map(v => parseInt(v) || 0);
+            const soma = cells.reduce((a, b) => a + b, 0);
+
+            // Fórmulas melhoradas com mais variações e padrões
+            numeros.push(Math.floor(Math.abs((cells[0] * 2 + cells[1] + cells[2] + soma % 7) * 17) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[3] + cells[4] * 3 + cells[5] + soma % 11) * 13) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[6] + cells[7] * 2 + cells[8] + soma % 13) * 19) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[9] * 3 + cells[10] + cells[11] + soma % 17) * 23) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[0] + cells[5] * 2 + cells[10] + soma % 19) * 29) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[1] + cells[6] * 3 + cells[11] + soma % 23) * 31) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[2] + cells[7] * 2 + cells[8] + soma % 29) * 37) % 60) + 1);
+            numeros.push(Math.floor(Math.abs((cells[3] + cells[4] * 2 + cells[5] + soma % 31) * 41) % 60) + 1);
+
+            return [...new Set(numeros)]
+                .filter(n => n >= 1 && n <= 60)
+                .sort((a, b) => a - b);
+        }
+
+        // Modificando a função processarMatriz para incluir o novo método
+        function processarMatriz() {
+            const cells = Array.from(document.getElementsByClassName('matrix-cell'))
+                .map(cell => cell.value || '0');
+
+            const { movimentos, frequencia } = extrairMovimentos();
+            const paresComPeso = new Map();
+
+            // Processar movimentos e seus pesos
+            movimentos.forEach(mov => {
+                const pesoBase = mov.peso;
+                const pesoPar = paresComPeso.get(mov.par) || { count: 0, peso: 0 };
+                const pesoPadrao = pesoPar.peso + pesoBase;
+                paresComPeso.set(mov.par, { count: pesoPar.count + 1, peso: pesoPadrao });
+
+                // Processar também o reverso
+                const pesoParReverso = paresComPeso.get(mov.parReverso) || { count: 0, peso: 0 };
+                paresComPeso.set(mov.parReverso, { count: pesoParReverso.count + 1, peso: pesoParReverso.peso + pesoBase });
+            });
+
+            // Gerar conjuntos de números com base nos pesos
+            for (let i = 1; i <= 2; i++) {
+                const numeros = Array.from(paresComPeso.entries())
+                    .sort((a, b) => b[1].peso - a[1].peso)
+                    .map(([par, { peso }]) => {
+                        const base = parseInt(par);
+                        const offset = aplicarOffsets(base, peso + i);
+                        return offset;
+                    });
+
+                const numerosUnicos = [...new Set(numeros)]
+                    .filter(n => n >= 1 && n <= 60)
+                    .slice(0, 6)
+                    .sort((a, b) => a - b);
+
+                exibirPalpites(numerosUnicos, i);
+            }
+
+            // Gerar conjuntos matemáticos aprimorados
+            for (let i = 3; i <= 4; i++) {
+                const numerosMatematicos = gerarNumerosMatematicos(cells);
+                const numerosModificados = numerosMatematicos.map(n => {
+                    const pesoFreq = Array.from(frequencia.values()).reduce((a, b) => a + b, 0);
+                    return Math.floor(Math.abs((n * (i === 3 ? pesoFreq : pesoFreq * 2) + i * 7)) % 60) + 1;
+                });
+                exibirPalpites(numerosModificados.slice(0, 6), i);
+            }
+
+            exibirRelatorioDetalhado(movimentos, paresComPeso, frequencia);
+        }
+
+        // Exibir palpites gerados
+        function exibirPalpites(numeros, conjunto) {
+            const container = document.getElementById(`palpites${conjunto}`);
+            container.innerHTML = '';
+            numeros.forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'number';
+                div.textContent = num;
+                container.appendChild(div);
+            });
+        }
+
+        // Verificar acertos
+        function verificarAcertos() {
+            const oficiais = Array.from(document.getElementsByClassName('official-number'))
+                .map(input => parseInt(input.value))
+                .filter(num => !isNaN(num));
+
+            if (oficiais.length !== 6) {
+                alert('Por favor, insira todos os números oficiais!');
+                return;
+            }
+
+            // Verificar cada conjunto de palpites
+            for (let i = 1; i <= 4; i++) {
+                const palpites = Array.from(document.getElementById(`palpites${i}`).getElementsByClassName('number'));
+                palpites.forEach(palpite => {
+                    const numero = parseInt(palpite.textContent);
+                    if (oficiais.includes(numero)) {
+                        palpite.classList.add('match');
+                    } else {
+                        palpite.classList.remove('match');
+                    }
+                });
+            }
+        }
+
+        // Exibir relatório de padrões
+        function exibirRelatorio(movimentos, pares) {
+            const report = document.getElementById('patternReport');
+            let html = '<h4>Frequência dos Pares:</h4>';
+            pares.forEach((freq, par) => {
+                html += `<p>Par ${par}: ${freq} ocorrências</p>`;
+            });
+
+            html += '<h4>Movimentos Detectados:</h4>';
+            movimentos.forEach(mov => {
+                html += `<p>${mov.tipo.toUpperCase()}: ${mov.par} (Posição: ${mov.posicao})</p>`;
+            });
+
+            report.innerHTML = html;
+        }
+
+        // Inicializar a matriz ao carregar a página
+        window.onload = inicializarMatriz;
+    </script>
+</body>
+</html>
