@@ -55,25 +55,45 @@ export default function MegaSenaGenerator() {
   const generateRandomNumbers = () => {
     let numbers: number[] = [];
     let attempts = 0;
-    const maxAttempts = 100; // Prevent infinite loops
+    const maxAttempts = 100;
+
+    // Reset conflicting filters
+    if (filters.evenNumbers && filters.oddNumbers) {
+      setFilters(prev => ({
+        ...prev,
+        evenNumbers: false,
+        oddNumbers: false,
+        evenAndOddNumbers: true
+      }));
+    }
+
+    const isValidNumber = (num: number): boolean => {
+      if (filters.primeNumbers && !isPrime(num)) return false;
+      if (filters.evenNumbers && num % 2 !== 0) return false;
+      if (filters.oddNumbers && num % 2 === 0) return false;
+      if (filters.evenAndOddNumbers) {
+        const currentEvenCount = numbers.filter(n => n % 2 === 0).length;
+        const currentOddCount = numbers.filter(n => n % 2 !== 0).length;
+        if (num % 2 === 0 && currentEvenCount >= 3) return false;
+        if (num % 2 !== 0 && currentOddCount >= 3) return false;
+      }
+      if (filters.largeSequence) {
+        const lastNumber = numbers[numbers.length - 1];
+        if (lastNumber && Math.abs(num - lastNumber) < 5) return false;
+      }
+      return true;
+    };
 
     while (numbers.length < 6 && attempts < maxAttempts) {
       attempts++;
       const randomNum = Math.floor(Math.random() * 60) + 1;
       
-      // Skip if number already exists in our set
       if (numbers.includes(randomNum)) continue;
+      if (!isValidNumber(randomNum)) continue;
       
-      // Apply filters
-      if (filters.primeNumbers && !isPrime(randomNum)) continue;
-      if (filters.evenNumbers && randomNum % 2 !== 0) continue;
-      if (filters.oddNumbers && randomNum % 2 === 0) continue;
-      
-      // Add the number if it passes all filters
       numbers.push(randomNum);
     }
 
-    // If we couldn't generate enough numbers with the filters, generate without filters
     if (numbers.length < 6) {
       numbers = [];
       while (numbers.length < 6) {
