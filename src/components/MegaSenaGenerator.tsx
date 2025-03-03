@@ -299,4 +299,23 @@ export default function MegaSenaGenerator() {
             <h2 className="text-2xl font-bold text-emerald-800">Minhas coleções</h2>
             <Select defaultValue="teste">
               <SelectTrigger className="w-32 border-emerald-300 focus:ring-emerald-500">
-                <SelectValue placeholder="
+                <SelectValue placeholder="Selecionar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="teste">Teste</SelectItem>
+                <SelectItem value="favoritos">Favoritos</SelectItem>
+                <SelectItem value="recentes">Recentes</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="text-center py-8 text-gray-500">
+              Selecione uma coleção para visualizar os jogos salvos.
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
