@@ -9,108 +9,18 @@
 }
 
 @layer components {
-  /* Button styles */
   .btn-primary {
-    @apply bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm md:text-base;
+    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
   }
   
   .btn-success {
-    @apply bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 text-sm md:text-base;
+    @apply bg-success text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
   }
   
   .input-field {
-    @apply border border-gray-300 rounded-lg px-4 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-200 text-gray-700;
+    @apply border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary;
   }
   
-  /* Lottery number styles */
-  .lottery-number {
-    @apply w-14 h-14 rounded-full bg-gradient-to-br from-green-600 to-green-700 text-white flex items-center justify-center font-bold text-xl shadow-md transition-transform duration-200 hover:scale-105;
-  }
-  
-  .lottery-number.placeholder {
-    @apply bg-gradient-to-br from-green-500 to-green-600 text-white text-2xl border-2 border-white;
-  }
-  
-  .lottery-number.text-sm {
-    @apply w-11 h-11 text-base;
-  }
-  
-  .lottery-number.match {
-    @apply bg-gradient-to-br from-green-400 to-green-500 ring-2 ring-yellow-300 ring-offset-1;
-  }
-  
-  .form-checkbox {
-    @apply h-5 w-5 rounded border-gray-300 text-green-600 shadow-sm focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50 transition-colors duration-200;
-  }
-  
-  /* Layout containers */
-  .lottery-container {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-8 p-8 max-w-7xl mx-auto;
-  }
-  
-  .panel {
-    @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow duration-300;
-  }
-  
-  .panel-title {
-    @apply text-xl font-semibold mb-5 text-gray-800 border-b pb-2 border-gray-200;
-  }
-  
-  /* Information display */
-  .info-row {
-    @apply flex items-center py-1.5;
-  }
-  
-  .info-label {
-    @apply font-medium text-gray-700;
-  }
-  
-  .info-value {
-    @apply ml-2 text-gray-800;
-  }
-  
-  .info-value.highlight {
-    @apply bg-green-600 text-white px-3 py-1 rounded-md font-medium;
-  }
-  
-  /* Grid layouts */
-  .numbers-grid {
-    @apply flex flex-wrap gap-4 justify-center mb-6 p-4 bg-gray-50 rounded-lg;
-  }
-  
-  .buttons-container {
-    @apply flex gap-5 justify-center mt-6;
-  }
-  
-  .lottery-numbers-grid {
-    @apply flex flex-wrap gap-3 justify-center mb-4 mt-2;
-  }
-  
-  .filters-container {
-    @apply space-y-4 py-2;
-  }
-  
-  .filter-option {
-    @apply flex items-center gap-3 py-1.5 px-2 rounded-md hover:bg-gray-50 transition-colors;
-  }
-  
-  .section-title {
-    @apply font-medium text-lg mb-3 text-gray-700;
-  }
-  
-  .saved-sets {
-    @apply space-y-3 mt-4;
-  }
-  
-  .saved-set {
-    @apply flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg;
-  }
-  
-  .collection-selector {
-    @apply w-full bg-white border border-gray-300 rounded-lg shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50;
-  }
-  
-  /* Preserve existing classes that might be used elsewhere */
   .matrix-cell {
     @apply w-12 h-12 border text-center text-lg rounded-md;
   }
@@ -119,110 +29,11 @@
     @apply invisible;
   }
   
-  .lottery-numbers-grid {
-    @apply flex gap-2 justify-center mb-4;
+  .lottery-number {
+    @apply w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold;
   }
   
-  .lottery-buttons {
-    @apply flex gap-4 justify-center mt-4;
-  }
-  
-  .checkbox-group {
-    @apply flex items-center gap-2;
-  }
-  
-  .contest-info {
-    @apply flex flex-col gap-2;
-  }
-  
-  .contest-label {
-    @apply font-semibold;
-  }
-  
-  .contest-value {
-    @apply bg-green-700 text-white px-4 py-1 rounded-md;
-  }
-  
-  .saved-numbers {
-    @apply flex flex-wrap gap-2 mt-4;
-  }
-}
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
+  .lottery-number.match {
+    @apply bg-success;
   }
 }

@@ -10,19 +10,7 @@ module.exports = {
       colors: {
         primary: '#007bff',
         success: '#28a745',
-        background: '#f8f9fa',
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
-        }
-      },
-      borderColor: {
-        DEFAULT: 'hsl(var(--border))'
+        background: '#f8f9fa'
       }
     },
   },

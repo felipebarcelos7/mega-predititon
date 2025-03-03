@@ -5,7 +5,6 @@ import OfficialResults from '../components/OfficialResults';
 import MatrixInput from '../components/MatrixInput';
 import PredictionResults from '../components/PredictionResults';
 import PatternReport from '../components/PatternReport';
-import MegaSenaGenerator from '../components/MegaSenaGenerator';
 
 export default function Home() {
   const [gameType, setGameType] = useState('mega-sena');
@@ -24,7 +23,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white shadow-2xl rounded-2xl overflow-hidden mb-8">
+        <div className="bg-white shadow-2xl rounded-2xl overflow-hidden">
           <div className="bg-primary text-white p-6 text-center">
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               MegaZinha do Fefe
@@ -99,21 +98,6 @@ export default function Home() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* MegaSena Generator Section */}
-        <div className="bg-white shadow-2xl rounded-2xl overflow-hidden">
-          <div className="bg-emerald-800 text-white p-6 text-center">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Gerador da Mega-Sena
-            </h1>
-            <p className="mt-2 text-sm sm:text-base text-emerald-100">
-              Gere e salve seus jogos da sorte
-            </p>
-          </div>
-          <div className="p-6 sm:p-8">
-            <MegaSenaGenerator />
           </div>
         </div>
       </div>
