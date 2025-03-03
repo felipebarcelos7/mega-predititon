@@ -63,10 +63,11 @@ export default function LotteryGenerator({ onNumbersGenerated }: LotteryGenerato
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+    <div className="lottery-container">
       {/* Left Panel - Number Selection */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex flex-wrap gap-4 justify-center mb-6">
+      <div className="panel">
+        <h3 className="panel-title">Gerador de Números</h3>
+        <div className="numbers-grid">
           {selectedNumbers.map((number, index) => (
             <div
               key={index}
@@ -76,95 +77,95 @@ export default function LotteryGenerator({ onNumbersGenerated }: LotteryGenerato
             </div>
           ))}
         </div>
-        <div className="flex gap-4 justify-center">
+        <div className="buttons-container">
           <button
             onClick={generateNumbers}
             className="btn-primary"
           >
-            Gerar
+            Gerar Números
           </button>
           <button
             onClick={saveNumbers}
             className="btn-success"
             disabled={!selectedNumbers.every(num => num > 0)}
           >
-            Salvar
+            Salvar Jogo
           </button>
         </div>
       </div>
 
       {/* Middle Panel - Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Filtros</h3>
-        <div className="space-y-3">
-          <label className="flex items-center gap-2">
+      <div className="panel">
+        <h3 className="panel-title">Filtros de Geração</h3>
+        <div className="filters-container">
+          <label className="filter-option">
             <input
               type="checkbox"
               checked={filters.primeNumbers}
               onChange={() => setFilters(prev => ({ ...prev, primeNumbers: !prev.primeNumbers }))}
               className="form-checkbox"
             />
-            Números Primos
+            <span>Números Primos</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="filter-option">
             <input
               type="checkbox"
               checked={filters.evenNumbers}
               onChange={() => setFilters(prev => ({ ...prev, evenNumbers: !prev.evenNumbers }))}
               className="form-checkbox"
             />
-            Números Pares
+            <span>Números Pares</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="filter-option">
             <input
               type="checkbox"
               checked={filters.oddNumbers}
               onChange={() => setFilters(prev => ({ ...prev, oddNumbers: !prev.oddNumbers }))}
               className="form-checkbox"
             />
-            Números Ímpares
+            <span>Números Ímpares</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="filter-option">
             <input
               type="checkbox"
               checked={filters.evenAndOddNumbers}
               onChange={() => setFilters(prev => ({ ...prev, evenAndOddNumbers: !prev.evenAndOddNumbers }))}
               className="form-checkbox"
             />
-            Números Pares e Ímpares
+            <span>Números Pares e Ímpares</span>
           </label>
-          <label className="flex items-center gap-2">
+          <label className="filter-option">
             <input
               type="checkbox"
               checked={filters.largeSequenceJumps}
               onChange={() => setFilters(prev => ({ ...prev, largeSequenceJumps: !prev.largeSequenceJumps }))}
               className="form-checkbox"
             />
-            Sequência grande de Saltos
+            <span>Sequência grande de Saltos</span>
           </label>
         </div>
       </div>
 
       {/* Right Panel - Contest Info */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold mb-4">Informações do Concurso</h3>
+      <div className="panel">
+        <h3 className="panel-title">Informações do Concurso</h3>
         {contestInfo && (
-          <div className="space-y-3">
-            <div>
-              <span className="font-medium">Concurso:</span>
-              <span className="ml-2">{contestInfo.numero}</span>
+          <div className="contest-info">
+            <div className="info-row">
+              <span className="info-label">Concurso:</span>
+              <span className="info-value highlight">{contestInfo.numero}</span>
             </div>
-            <div>
-              <span className="font-medium">Data:</span>
-              <span className="ml-2">{new Date(contestInfo.dataApuracao).toLocaleDateString()}</span>
+            <div className="info-row">
+              <span className="info-label">Data:</span>
+              <span className="info-value">{new Date(contestInfo.dataApuracao).toLocaleDateString()}</span>
             </div>
-            <div>
-              <span className="font-medium">Status:</span>
-              <span className="ml-2">{contestInfo.acumulado ? 'ACUMULADO' : 'Premiado'}</span>
+            <div className="info-row">
+              <span className="info-label">Status:</span>
+              <span className="info-value highlight">{contestInfo.acumulado ? 'ACUMULADO' : 'Premiado'}</span>
             </div>
-            <div>
-              <span className="font-medium">Números Sorteados:</span>
-              <div className="flex flex-wrap gap-2 mt-2">
+            <div className="mt-4">
+              <span className="section-title">Números Sorteados:</span>
+              <div className="lottery-numbers-grid">
                 {contestInfo.listaDezenas.map((num, index) => (
                   <div key={index} className="lottery-number">
                     {num}
@@ -177,27 +178,31 @@ export default function LotteryGenerator({ onNumbersGenerated }: LotteryGenerato
 
         {/* Saved Numbers Section */}
         <div className="mt-6">
-          <h4 className="font-medium mb-2">Dezenas não salvas</h4>
-          <div className="space-y-2">
-            {savedSets.map((set, index) => (
-              <div key={index} className="flex flex-wrap gap-2">
-                {set.map((num, numIndex) => (
-                  <div key={numIndex} className="lottery-number text-sm">
-                    {num}
-                  </div>
-                ))}
-              </div>
-            ))}
+          <h4 className="section-title">Jogos Salvos</h4>
+          <div className="saved-sets">
+            {savedSets.length > 0 ? (
+              savedSets.map((set, index) => (
+                <div key={index} className="saved-set">
+                  {set.map((num, numIndex) => (
+                    <div key={numIndex} className="lottery-number text-sm">
+                      {num}
+                    </div>
+                  ))}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">Nenhum jogo salvo ainda</p>
+            )}
           </div>
         </div>
 
         {/* Collections Section */}
         <div className="mt-6">
-          <h4 className="font-medium mb-2">Minhas coleções</h4>
+          <h4 className="section-title">Minhas Coleções</h4>
           <select
             value={selectedCollection}
             onChange={(e) => setSelectedCollection(e.target.value)}
-            className="w-full input-field"
+            className="collection-selector p-2"
           >
             {collections.map((collection, index) => (
               <option key={index} value={collection}>
