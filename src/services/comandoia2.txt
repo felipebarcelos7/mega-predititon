@@ -1,0 +1,77 @@
+# MegaSenaGenerator Component Analysis
+The MegaSenaGenerator.tsx component is a comprehensive lottery number generator for the Brazilian MegaSena lottery. Here's a detailed breakdown of its structure and functionality:
+
+## Component Structure
+This component is built using React with TypeScript and appears to use a UI component library (likely Shadcn UI based on the component names like Card , Button , Checkbox , etc.).
+
+## State Management
+The component manages several pieces of state:
+
+- generatedNumbers : Stores the currently generated lottery numbers
+- savedSets : Tracks sets of numbers that the user has saved
+- filters : Contains boolean flags for different filtering options:
+  - primeNumbers : For prime number filtering
+  - evenNumbers : For even number filtering
+  - oddNumbers : For odd number filtering (set to true by default)
+  - evenAndOddNumbers : For mixed even/odd filtering
+  - largeSequence : For sequence jump filtering
+- contests : Stores information about previous lottery contests including:
+  - Contest ID
+  - Date
+  - Result status
+  - Drawn numbers
+## Key Functions
+1. generateRandomNumbers() : Creates a random set of 6 unique numbers between 1-60, sorted in ascending order
+2. handleGenerate() : Updates the state with newly generated numbers
+3. handleSave() : Adds the current set of generated numbers to the saved sets
+4. handleDeleteSavedSet() : Removes a saved set by index
+5. handleFilterChange() : Toggles filter options
+6. formatNumber() : Formats numbers to always display with 2 digits or shows "?" for zero values
+## UI Layout
+The UI is organized in a responsive grid layout with several panels:
+
+### Top Section (3-column grid on desktop, 1-column on mobile)
+1. Left Panel - Number Generator
+   
+   - Title: "Números da MegaSena"
+   - Six circular containers displaying generated numbers or "?" placeholders
+   - Two buttons: "Gerar" (Generate) and "Salvar" (Save)
+2. Middle Panel - Filters
+   
+   - Title: "Filtros e regras"
+   - Six checkbox options for different filtering strategies
+   - Each filter has a label and interactive checkbox
+3. Right Panel - Results
+   
+   - Displays information for two contests (2670 and 2669)
+   - For each contest shows:
+     - Contest ID
+     - Draw date
+     - Result status ("ACUMULADO")
+     - The drawn numbers in circular containers
+   - First contest has an information icon and separator
+### Bottom Section (2-column grid on desktop, 1-column on mobile)
+1. Left Panel - Unsaved Numbers
+   
+   - Title: "Dezenas não salvas"
+   - Displays two rows of sample numbers (1, 27, 30, 41, 46, 57)
+   - Each row has delete (trash) and bookmark buttons
+2. Right Panel - Collections
+   
+   - Title: "Minhas coleções"
+   - Dropdown selector with options (Teste, Favoritos, Recentes)
+   - Displays two rows of sample numbers with delete and bookmark buttons
+## Visual Design
+- Uses emerald green ( bg-emerald-800 ) as the primary color
+- Circular containers for lottery numbers
+- Card-based layout with subtle shadows
+- Responsive design that adapts to different screen sizes
+- Consistent spacing and typography
+## Interaction Flow
+1. User can generate random numbers by clicking "Gerar"
+2. User can apply filters to control the generation algorithm
+3. User can save generated numbers by clicking "Salvar"
+4. User can view previous contest results
+5. User can organize saved numbers into collections
+6. User can delete saved number sets
+The component provides a complete interface for generating, filtering, saving, and managing MegaSena lottery numbers, along with displaying historical contest data.
