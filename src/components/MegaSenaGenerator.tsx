@@ -1,4 +1,23 @@
-ate({
+'use client';
+
+import { useState } from 'react';
+import { Button } from './ui/button';
+import { Card } from './ui/card';
+import { Checkbox } from './ui/checkbox';
+import { Separator } from './ui/separator';
+import { Info } from 'lucide-react';
+
+interface Contest {
+  id: number;
+  date: string;
+  result: string;
+  numbers: number[];
+}
+
+export default function MegaSenaGenerator() {
+  const [generatedNumbers, setGeneratedNumbers] = useState<number[]>([]);
+  const [savedSets, setSavedSets] = useState<number[][]>([]);
+  const [filters, setFilters] = useState({
     primeNumbers: false,
     evenNumbers: false,
     oddNumbers: true,
@@ -55,10 +74,7 @@ ate({
     });
   };
 
-  // Format number to always have 2 digits
-  const formatNumber = (num: number) => {
-    return num === 0 ? '?' : num.toString().padStart(2, '0');
-  };
+  const formatNumber = (num: number) => num === 0 ? '?' : num.toString().padStart(2, '0');
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -143,15 +159,6 @@ ate({
               />
               <label htmlFor="largeSequence" className="text-base">Sequência grande de Saltos</label>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="evenAndOddNumbers2" 
-                checked={filters.evenAndOddNumbers}
-                onCheckedChange={() => handleFilterChange('evenAndOddNumbers')}
-              />
-              <label htmlFor="evenAndOddNumbers2" className="text-base">Números Pares e Ímpares</label>
-            </div>
           </div>
         </Card>
 
@@ -196,71 +203,6 @@ ate({
                 </div>
                 
                 {index === 0 && <Separator className="my-4" />}
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {/* Bottom Panel - Saved Numbers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <Card className="p-6 shadow-sm">
-          <h2 className="text-2xl font-bold mb-6">Dezenas não salvas</h2>
-          
-          <div className="space-y-4">
-            {[...Array(2)].map((_, rowIndex) => (
-              <div key={rowIndex} className="flex flex-wrap gap-2">
-                {[1, 27, 30, 41, 46, 57].map((number, index) => (
-                  <div 
-                    key={index} 
-                    className="w-12 h-12 rounded-full bg-emerald-800 text-white flex items-center justify-center text-lg font-bold"
-                  >
-                    {formatNumber(number)}
-                  </div>
-                ))}
-                <Button variant="outline" className="w-12 h-12 p-0 rounded-full">
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" className="w-12 h-12 p-0 rounded-full">
-                  <Bookmark className="h-5 w-5" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </Card>
-        
-        <Card className="p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Minhas coleções</h2>
-            <Select defaultValue="teste">
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="teste">Teste</SelectItem>
-                <SelectItem value="favoritos">Favoritos</SelectItem>
-                <SelectItem value="recentes">Recentes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-4">
-            {[...Array(2)].map((_, rowIndex) => (
-              <div key={rowIndex} className="flex flex-wrap gap-2">
-                {[1, 27, 30, 41, 46, 57].map((number, index) => (
-                  <div 
-                    key={index} 
-                    className="w-12 h-12 rounded-full bg-emerald-800 text-white flex items-center justify-center text-lg font-bold"
-                  >
-                    {formatNumber(number)}
-                  </div>
-                ))}
-                <Button variant="outline" className="w-12 h-12 p-0 rounded-full">
-                  <Trash2 className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" className="w-12 h-12 p-0 rounded-full">
-                  <Bookmark className="h-5 w-5" />
-                </Button>
               </div>
             ))}
           </div>
