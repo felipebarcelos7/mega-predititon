@@ -17,7 +17,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="p-6 sm:p-8">
+          <div className="p-6">  {/* Changed from p-6 sm:p-8 */}
             <MegaSenaGenerator />
           </div>
         </div>

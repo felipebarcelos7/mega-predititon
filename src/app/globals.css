@@ -14,7 +14,7 @@
   }
   
   .btn-success {
-    @apply bg-success text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
+    @apply bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors;
   }
   
   .input-field {
@@ -34,6 +34,6 @@
   }
   
   .lottery-number.match {
-    @apply bg-success;
+    @apply bg-green-600;
   }
 }

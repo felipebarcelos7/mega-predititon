@@ -8,7 +8,7 @@ import Navbar from '@/components/Navbar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Gerador de Números da MegaSena',
+  title: 'MegaFortuna520',
   description: 'Gerador de números para a MegaSena com filtros e regras personalizáveis',
 }
 
@@ -24,7 +24,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <SessionProvider session={session}>
           <Navbar />
-          <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-1">
             {children}
           </main>
         </SessionProvider>
