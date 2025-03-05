@@ -44,6 +44,7 @@ export default function OfficialResults({ gameType, predictions }: OfficialResul
   const [error, setError] = useState<string>('');
   const [contestNumber, setContestNumber] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [drawInfo, setDrawInfo] = useState<LotteryDraw | null>(null);
 
   useEffect(() => {
     setOfficialNumbers(Array(config.maxNumbers).fill(0));
@@ -70,6 +71,7 @@ export default function OfficialResults({ gameType, predictions }: OfficialResul
       const result = await getLotteryResult(parsedContestNumber, gameType);
       const numbers = result.listaDezenas.map(num => parseInt(num));
       setOfficialNumbers(numbers);
+      setDrawInfo(result);
     } catch (error) {
       setError('Erro ao buscar resultado do concurso. Tente novamente.');
       console.error('Error fetching lottery result:', error);
@@ -139,6 +141,24 @@ export default function OfficialResults({ gameType, predictions }: OfficialResul
             </button>
           </div>
 
+          {drawInfo && (
+            <div className="mb-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="p-2">
+                  <p className="text-emerald-600 font-semibold">Concurso:</p>
+                  <p className="text-lg font-bold text-emerald-800">{drawInfo.numero}</p>
+                </div>
+                <div className="p-2">
+                  <p className="text-emerald-600 font-semibold">Apuração:</p>
+                  <p className="text-lg font-bold text-emerald-800">{new Date(drawInfo.dataApuracao).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div className="p-2">
+                  <p className="text-emerald-600 font-semibold">Resultado:</p>
+                  <p className="text-lg font-bold text-emerald-800">{drawInfo.acumulado ? 'ACUMULADO' : 'PREMIADO'}</p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex flex-wrap gap-4 justify-center">
               {officialNumbers.map((num, index) => (

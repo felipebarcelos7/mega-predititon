@@ -64,16 +64,19 @@ export default function MegaSenaGenerator() {
   });
   
   const [contests, setContests] = useState<Contest[]>([{
-    id: 2670,
-    date: '31/12/2023',
-    result: 'ACUMULADO',
+    id: 0,
+    date: '',
+    result: '',
     numbers: [0, 0, 0, 0, 0, 0]
-  },
-  {
-    id: 2669,
-    date: '16/12/2023',
-    result: 'ACUMULADO',
-    numbers: [4, 7, 16, 35, 46, 54]
+  }]);
+
+  const [selectedContest, setSelectedContest] = useState<number | null>(null);
+
+  const [previousContests, setPreviousContests] = useState<Contest[]>([{
+    id: 0,
+    date: '',
+    result: '',
+    numbers: [0, 0, 0, 0, 0, 0]
   }]);
 
   useEffect(() => {
@@ -494,6 +497,41 @@ export default function MegaSenaGenerator() {
               <PatternReport report={patternReport} />
             </div>
           )}
+
+          {/* Saved Games and Results */}
+          {savedSets.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-4">Jogos Salvos</h2>
+              <div className="grid grid-cols-1 gap-4">
+                {savedSets.map((set, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {set.map((number) => (
+                        <div
+                          key={number}
+                          className="w-8 h-8 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold"
+                        >
+                          {number}
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteSavedSet(index)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      Excluir
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Verificar Resultados</h2>
+                <OfficialResults gameType="mega-sena" predictions={savedSets} />
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Right Panel - Results */}
@@ -617,3 +655,60 @@ export default function MegaSenaGenerator() {
       peso: movementWeights[`${movement.tipo}-${movement.par}`] / predictions.length
     }));
   };
+
+  const [searchContest, setSearchContest] = useState<string>('');
+  const [searchResult, setSearchResult] = useState<Contest | null>(null);
+
+  const handleSearchContest = async () => {
+    try {
+      const result = await getLotteryResult(Number(searchContest));
+      setSearchResult({
+        id: result.numero,
+        date: result.dataApuracao,
+        result: result.acumulado ? 'ACUMULADO' : 'PREMIADO',
+        numbers: result.listaDezenas.map(Number)
+      });
+    } catch (error) {
+      console.error('Error fetching contest:', error);
+      setSearchResult(null);
+    }
+  };
+
+  // Add this section in the JSX, after the title "Números da MegaSena"
+  <div className="mb-6">
+    <div className="flex gap-2 mb-4">
+      <input
+        type="text"
+        value={searchContest}
+        onChange={(e) => setSearchContest(e.target.value)}
+        placeholder="Número do concurso"
+        className="flex-1 p-2 border rounded-md"
+      />
+      <Button
+        onClick={handleSearchContest}
+        className="bg-emerald-800 text-white hover:bg-emerald-700"
+      >
+        Buscar
+      </Button>
+    </div>
+    {searchResult && (
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+          <div>Concurso: {searchResult.id}</div>
+          <div>Data: {searchResult.date}</div>
+          <div>Resultado: {searchResult.result}</div>
+        </div>
+        <div className="flex gap-2 justify-center">
+          {searchResult.numbers.map((num, idx) => (
+            <div
+              key={idx}
+              className="w-12 h-12 rounded-full bg-emerald-800 text-white flex items-center justify-center text-lg font-bold"
+            >
+              {num}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+}
