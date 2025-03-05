@@ -64,7 +64,13 @@ export default function MatrixInput({ gameType, onPredictionsGenerated }: Matrix
 
     // Validate input to ensure it's a single digit between 0-9
     const numValue = parseInt(value);
-    if (isNaN(numValue) || numValue < 0 || numValue > 9) {
+    if (isNaN(numValue) || numValue < 0 || numValue > 9 || value.length > 1) {
+      return;
+    }
+
+    // Check for duplicate values in visible cells
+    const visibleCells = matrix.filter((_, idx) => layout[Math.floor(idx / 4)][idx % 4]);
+    if (visibleCells.includes(String(numValue))) {
       return;
     }
 
@@ -206,34 +212,34 @@ export default function MatrixInput({ gameType, onPredictionsGenerated }: Matrix
     const { movimentos, frequencia } = extractMovements();
     const paresComPeso = new Map<string, { count: number; peso: number }>();
 
-    // Process movements and their weights
+    // Process movements and their weights with enhanced pattern analysis
     movimentos.forEach(mov => {
-      const pesoBase = mov.peso;
+      const pesoBase = calculatePesoBase(mov);
       const pesoPar = paresComPeso.get(mov.par) || { count: 0, peso: 0 };
       paresComPeso.set(mov.par, {
         count: pesoPar.count + 1,
         peso: pesoPar.peso + pesoBase
       });
 
-      // Also process reverse pairs
+      // Process reverse pairs with pattern consideration
       if (mov.par !== mov.parReverso) {
         const pesoParReverso = paresComPeso.get(mov.parReverso) || { count: 0, peso: 0 };
         paresComPeso.set(mov.parReverso, {
           count: pesoParReverso.count + 1,
-          peso: pesoParReverso.peso + pesoBase
+          peso: pesoParReverso.peso + calculatePesoBase({ ...mov, par: mov.parReverso, parReverso: mov.par })
         });
       }
     });
 
     const predictions: number[][] = [];
 
-    // Generate number sets based on weights and filters
+    // Generate number sets based on enhanced pattern analysis
     for (let i = 1; i <= 4; i++) {
       const numeros = Array.from(paresComPeso.entries())
         .sort((a, b) => b[1].peso - a[1].peso)
         .map(([par, { peso }]) => {
           const base = parseInt(par);
-          return applyOffsets(base, peso + i);
+          return generateNumberFromPattern(base, peso, i);
         });
 
       let numerosUnicos = Array.from(new Set(numeros))
@@ -266,10 +272,44 @@ export default function MatrixInput({ gameType, onPredictionsGenerated }: Matrix
     onPredictionsGenerated(predictions, report);
   };
 
-  const applyOffsets = (numero: number, variacao = 0) => {
+  const calculatePesoBase = (mov: Movement) => {
+    let peso = mov.peso;
+    
+    // Adjust weight based on movement type
+    switch (mov.tipo) {
+      case 'diagonal':
+        peso *= 1.5; // Diagonal patterns have higher significance
+        break;
+      case 'horizontal':
+      case 'vertical':
+        peso *= 1.2; // Straight line patterns have medium significance
+        break;
+      default:
+        peso *= 1.0; // Additional patterns maintain base significance
+    }
+
+    // Consider position-based weight adjustments
+    if (mov.posicao.startsWith('d')) peso *= 1.3; // Diagonal positions
+    if (mov.posicao.startsWith('h')) peso *= 1.2; // Horizontal positions
+    if (mov.posicao.startsWith('v')) peso *= 1.1; // Vertical positions
+
+    return peso;
+  };
+
+  const generateNumberFromPattern = (base: number, peso: number, variacao: number) => {
     const primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59];
-    const primoIndex = numero % primos.length;
-    return Math.floor((numero * primos[primoIndex] + (13 + variacao)) % 60) + 1;
+    const fibonacci = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+    
+    // Use multiple mathematical sequences for better distribution
+    const primoIndex = base % primos.length;
+    const fiboIndex = (base + variacao) % fibonacci.length;
+    
+    // Combine different mathematical patterns
+    const num = Math.floor(
+      ((base * primos[primoIndex] + fibonacci[fiboIndex]) * peso + variacao * 7) % 60
+    ) + 1;
+    
+    return num;
   };
 
   const generateReport = (
@@ -374,7 +414,8 @@ export default function MatrixInput({ gameType, onPredictionsGenerated }: Matrix
               maxLength={1}
               value={matrix[index]}
               onChange={(e) => handleCellChange(index, e.target.value)}
-              className="w-16 h-16 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 hover:border-indigo-400"
+              className="w-16 h-16 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 hover:border-indigo-400 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:hover:border-gray-300"
+              disabled={!isVisible}
             />
           </div>
         ))}
