@@ -117,57 +117,66 @@ export default function OfficialResults({ gameType, predictions }: OfficialResul
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg border border-gray-100">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800">Resultado Oficial - {gameType.toUpperCase()}</h3>
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-center gap-4 justify-center mb-4">
-          <input
-            type="number"
-            value={contestNumber}
-            onChange={(e) => setContestNumber(e.target.value)}
-            placeholder="Número do concurso"
-            className="w-40 h-12 text-center text-lg font-semibold border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-200 hover:border-blue-300"
-          />
+    <div className="space-y-8">
+      <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+        <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">Resultado Oficial - {gameType.toUpperCase()}</h3>
+        
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-4 justify-center mb-4">
+            <input
+              type="number"
+              value={contestNumber}
+              onChange={(e) => setContestNumber(e.target.value)}
+              placeholder="Número do concurso"
+              className="w-40 h-12 text-center text-lg font-semibold border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 hover:border-green-300"
+            />
+            <button
+              onClick={fetchLotteryResult}
+              disabled={loading}
+              className="h-12 px-6 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Buscando...' : 'Buscar Resultado'}
+            </button>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex flex-wrap gap-4 justify-center">
+              {officialNumbers.map((num, index) => (
+                <input
+                  key={index}
+                  type="number"
+                  min={config.minValue}
+                  max={config.maxValue}
+                  value={num || ''}
+                  onChange={(e) => handleNumberChange(index, e.target.value)}
+                  className={`w-16 h-16 text-center text-xl font-bold ${error ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'} border-2 rounded-full focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-200 hover:border-green-300 shadow-sm`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div className="text-red-500 text-sm font-medium bg-red-50 p-4 rounded-lg border border-red-200 shadow-sm">
+              ⚠️ {error}
+            </div>
+          )}
+
           <button
-            onClick={fetchLotteryResult}
-            disabled={loading}
-            className="h-12 px-6 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={verifyMatches}
+            className="w-full md:w-auto px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-md hover:shadow-lg mx-auto block"
           >
-            {loading ? 'Buscando...' : 'Buscar Resultado'}
+            Verificar Acertos
           </button>
         </div>
-        <div className="flex flex-wrap gap-4 justify-center">
-          {officialNumbers.map((num, index) => (
-            <input
-              key={index}
-              type="number"
-              min={config.minValue}
-              max={config.maxValue}
-              value={num || ''}
-              onChange={(e) => handleNumberChange(index, e.target.value)}
-              className={`w-16 h-16 text-center text-lg font-semibold ${error ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'} border-2 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-200 hover:border-blue-300`}
-            />
-          ))}
-        </div>
+      </div>
 
-        {error && (
-          <div className="text-red-500 text-sm font-medium bg-red-50 p-3 rounded-lg border border-red-200">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <button
-          onClick={verifyMatches}
-          className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-sm hover:shadow-md"
-        >
-          Verificar Acertos
-        </button>
-
-        {matches.length > 0 && (
-          <div className="space-y-6 mt-6">
+      {matches.length > 0 && (
+        <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+          <h4 className="text-xl font-bold mb-6 text-gray-800 text-center">Resultados da Verificação</h4>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {predictions.map((prediction, setIndex) => (
-              <div key={setIndex} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-200 transition-all duration-200">
-                <div className="flex flex-wrap gap-3">
+              <div key={setIndex} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-green-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                <div className="flex flex-wrap gap-3 justify-center">
                   {prediction.map((number, numIndex) => (
                     <div
                       key={numIndex}
@@ -177,14 +186,14 @@ export default function OfficialResults({ gameType, predictions }: OfficialResul
                     </div>
                   ))}
                 </div>
-                <p className="mt-3 text-sm text-gray-600">
-                  Acertos: {matches[setIndex].filter(Boolean).length}
+                <p className="mt-4 text-center font-semibold text-gray-700">
+                  Acertos: <span className="text-green-600">{matches[setIndex].filter(Boolean).length}</span>
                 </p>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
