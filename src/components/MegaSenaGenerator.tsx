@@ -61,6 +61,31 @@ export default function MegaSenaGenerator() {
       setFilters(savedState.filters);
       setConcatenatedValues(savedState.concatenatedValues);
     }
+
+    const fetchContestData = async () => {
+      try {
+        // Fetch latest contest
+        const latestResult = await getLotteryResult();
+        // Fetch previous contest
+        const previousResult = await getLotteryResult(latestResult.numero - 1);
+
+        const formatContestData = (result: any): Contest => ({
+          id: result.numero,
+          date: result.dataApuracao,
+          result: result.acumulado ? 'ACUMULADO' : 'PREMIADO',
+          numbers: result.listaDezenas.map(Number)
+        });
+
+        setContests([
+          formatContestData(latestResult),
+          formatContestData(previousResult)
+        ]);
+      } catch (error) {
+        console.error('Error fetching lottery data:', error);
+      }
+    };
+
+    fetchContestData();
   }, []);
 
   const generateRandomNumbers = () => {
