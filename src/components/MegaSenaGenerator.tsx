@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Checkbox } from './ui/checkbox';
 import { Separator } from './ui/separator';
 import { Info } from 'lucide-react';
+import { saveMatrixState, loadMatrixState, clearMatrixState } from '../services/matrixStorage';
+import { getLotteryResult } from '../services/lotteryApi';
 
 interface Contest {
   id: number;
@@ -14,9 +16,23 @@ interface Contest {
   numbers: number[];
 }
 
+interface MatrixState {
+  matrix: string[];
+  filters: {
+    primeNumbers: boolean;
+    evenNumbers: boolean;
+    oddNumbers: boolean;
+    largeSequence: boolean;
+  };
+  concatenatedValues: { forward: string; reverse: string; }[];
+}
+
 export default function MegaSenaGenerator() {
   const [generatedNumbers, setGeneratedNumbers] = useState<number[]>([]);
   const [savedSets, setSavedSets] = useState<number[][]>([]);
+  const [matrixValues, setMatrixValues] = useState<string[]>(Array(16).fill(''));
+  const [predictions, setPredictions] = useState<number[][]>([]);
+  const [concatenatedValues, setConcatenatedValues] = useState<{ forward: string; reverse: string; }[]>([]);
   const [filters, setFilters] = useState({
     primeNumbers: false,
     evenNumbers: false,
@@ -25,20 +41,27 @@ export default function MegaSenaGenerator() {
     largeSequence: false,
   });
   
-  const [contests, setContests] = useState<Contest[]>([
-    {
-      id: 2670,
-      date: '31/12/2023',
-      result: 'ACUMULADO',
-      numbers: [0, 0, 0, 0, 0, 0]
-    },
-    {
-      id: 2669,
-      date: '16/12/2023',
-      result: 'ACUMULADO',
-      numbers: [4, 7, 16, 35, 46, 54]
+  const [contests, setContests] = useState<Contest[]>([{
+    id: 2670,
+    date: '31/12/2023',
+    result: 'ACUMULADO',
+    numbers: [0, 0, 0, 0, 0, 0]
+  },
+  {
+    id: 2669,
+    date: '16/12/2023',
+    result: 'ACUMULADO',
+    numbers: [4, 7, 16, 35, 46, 54]
+  }]);
+
+  useEffect(() => {
+    const savedState = loadMatrixState();
+    if (savedState) {
+      setMatrixValues(savedState.matrix);
+      setFilters(savedState.filters);
+      setConcatenatedValues(savedState.concatenatedValues);
     }
-  ]);
+  }, []);
 
   const generateRandomNumbers = () => {
     const numbers: number[] = [];
@@ -74,6 +97,135 @@ export default function MegaSenaGenerator() {
     });
   };
 
+  const handleMatrixInputChange = (index: number, value: string) => {
+    if (value === '' || (value.length === 1 && /^[0-9]$/.test(value))) {
+      const newMatrix = [...matrixValues];
+      newMatrix[index] = value;
+      setMatrixValues(newMatrix);
+      calculateConcatenatedValues(newMatrix);
+    }
+  };
+
+  const calculateConcatenatedValues = (matrix: string[]) => {
+    const newConcatenatedValues: { forward: string; reverse: string; }[] = [];
+
+    // Horizontal concatenation
+    for (let i = 0; i < 16; i += 4) {
+      const row = matrix.slice(i, i + 4).join('');
+      if (row.length === 4) {
+        newConcatenatedValues.push({
+          forward: row,
+          reverse: row.split('').reverse().join('')
+        });
+      }
+    }
+
+    // Vertical concatenation
+    for (let i = 0; i < 4; i++) {
+      const column = [matrix[i], matrix[i + 4], matrix[i + 8], matrix[i + 12]].join('');
+      if (column.length === 4) {
+        newConcatenatedValues.push({
+          forward: column,
+          reverse: column.split('').reverse().join('')
+        });
+      }
+    }
+
+    // Diagonal concatenation (top-left to bottom-right)
+    const diagonal1 = [matrix[0], matrix[5], matrix[10], matrix[15]].join('');
+    if (diagonal1.length === 4) {
+      newConcatenatedValues.push({
+        forward: diagonal1,
+        reverse: diagonal1.split('').reverse().join('')
+      });
+    }
+
+    // Diagonal concatenation (top-right to bottom-left)
+    const diagonal2 = [matrix[3], matrix[6], matrix[9], matrix[12]].join('');
+    if (diagonal2.length === 4) {
+      newConcatenatedValues.push({
+        forward: diagonal2,
+        reverse: diagonal2.split('').reverse().join('')
+      });
+    }
+
+    setConcatenatedValues(newConcatenatedValues);
+  };
+
+  const generatePredictions = () => {
+    const newPredictions: number[][] = [];
+    const usedNumbers = new Set<number>();
+    const validNumbers = Array.from({ length: 60 }, (_, i) => i + 1);
+
+    // Helper functions
+    const isPrime = (num: number) => {
+      if (num < 2) return false;
+      for (let i = 2; i <= Math.sqrt(num); i++) {
+        if (num % i === 0) return false;
+      }
+      return true;
+    };
+
+    const isEven = (num: number) => num % 2 === 0;
+
+    // Filter numbers based on selected filters
+    const filteredNumbers = validNumbers.filter(num => {
+      if (filters.primeNumbers && !isPrime(num)) return false;
+      if (filters.evenNumbers && !isEven(num)) return false;
+      if (filters.oddNumbers && isEven(num)) return false;
+      return true;
+    });
+
+    // Generate predictions based on concatenated values
+    concatenatedValues.forEach(({ forward, reverse }) => {
+      const forwardNum = parseInt(forward);
+      const reverseNum = parseInt(reverse);
+
+      if (!isNaN(forwardNum) && !isNaN(reverseNum)) {
+        const prediction: number[] = [];
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        while (prediction.length < 6 && attempts < maxAttempts) {
+          attempts++;
+          const baseNum = attempts % 2 === 0 ? forwardNum : reverseNum;
+          const num = (baseNum % 60) + 1;
+
+          if (
+            !usedNumbers.has(num) &&
+            filteredNumbers.includes(num) &&
+            !prediction.includes(num)
+          ) {
+            prediction.push(num);
+            usedNumbers.add(num);
+          }
+        }
+
+        if (prediction.length === 6) {
+          newPredictions.push(prediction.sort((a, b) => a - b));
+        }
+      }
+    });
+
+    setPredictions(newPredictions);
+    saveCurrentState();
+  };
+
+  const saveCurrentState = () => {
+    const state: MatrixState = {
+      matrix: matrixValues,
+      filters,
+      concatenatedValues
+    };
+    saveMatrixState(state);
+  };
+
+  const clearMatrix = () => {
+    setMatrixValues(Array(16).fill(''));
+    setConcatenatedValues([]);
+    clearMatrixState();
+  };
+
   const formatNumber = (num: number) => num === 0 ? '?' : num.toString().padStart(2, '0');
 
   return (
@@ -107,6 +259,37 @@ export default function MegaSenaGenerator() {
             >
               Salvar
             </Button>
+          </div>
+
+          {/* Matrix Input Grid */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Matriz de Previsão</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {matrixValues.map((value, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  value={value}
+                  onChange={(e) => handleMatrixInputChange(index, e.target.value)}
+                  className="w-12 h-12 text-center border rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  maxLength={1}
+                />
+              ))}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                onClick={generatePredictions}
+                className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700"
+              >
+                Gerar Previsões
+              </Button>
+              <Button
+                onClick={clearMatrix}
+                className="flex-1 bg-gray-200 text-gray-700 hover:bg-gray-300"
+              >
+                Limpar Matriz
+              </Button>
+            </div>
           </div>
         </Card>
 
@@ -160,6 +343,29 @@ export default function MegaSenaGenerator() {
               <label htmlFor="largeSequence" className="text-base">Sequência grande de Saltos</label>
             </div>
           </div>
+
+          {/* Prediction Results */}
+          {predictions.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold mb-4">Previsões Geradas</h3>
+              <div className="space-y-4">
+                {predictions.map((prediction, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex flex-wrap gap-2">
+                      {prediction.map((number, numIndex) => (
+                        <div
+                          key={numIndex}
+                          className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold"
+                        >
+                          {number}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* Right Panel - Results */}
